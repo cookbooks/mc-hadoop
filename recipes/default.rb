@@ -17,9 +17,8 @@
 # limitations under the License.
 #
 
-include_recipe "java"
-
 execute "apt-get update" do
+  command "apt-get update"
   action :nothing
 end
 
@@ -27,12 +26,13 @@ template "/etc/apt/sources.list.d/cloudera.list" do
   owner "root"
   mode "0644"
   source "cloudera.list.erb"
-  notifies :run, resources("execute[apt-get update]"), :immediately
 end
 
-execute "curl -s http://archive.cloudera.com/debian/archive.key | apt-key add -" do
-  not_if "apt-key export 'Cloudera Apt Repository'"
+execute "wget -q -O - http://archive.cloudera.com/cdh4/debian/squeeze/amd64/cdh/archive.key | apt-key add -" do
+  user "root"
+  notifies :run, "execute[apt-get update]", :immediately
 end
 
-package "hadoop"
-
+# handle hostname
+# handle server names in /etc/hosts (not needed with DNS)
+# configure hdfs
